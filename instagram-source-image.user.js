@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.1
+// @version      0.1.1
 // @description  Adds buttons for simple image saving and searching in Instagram
+// @downloadURL  https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
+// @updateURL    https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
 // @author       coffecode, Search icon made by Smashicons from www.flaticon.com, Google icon made by SimpleIcon from www.flaticon.com
 // @include      https://*.instagram.com/*
 // @grant        none
