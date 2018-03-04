@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.2.1
+// @version      0.3.0
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -37,6 +37,7 @@
         if(video) {
             let article = video.closest('article');
             if(article) {
+                //video.crossOrigin = "anonymous";
                 addButtons(article, video.src, video.poster);
             }
         }
@@ -63,12 +64,15 @@
 
     let videoObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-            // console.log(mutation);
+            console.log(mutation);
             let video = mutation.target;
-
+           // video.crossOrigin = "anonymous";
             let article = video.closest('article');
             if(article) {
-                addButtons(article, video.src, video.poster);
+                let screenshotSrc = makeScreenshot(video);
+                console.log(screenshotSrc);
+                //addButtons(article, video.src, video.poster);
+                addButtons(article, screenshotSrc, screenshotSrc);
             }
         });
     }).observe(document.body, {
@@ -87,8 +91,6 @@
         addSourceButton(menuBar, src);
         addGoogleButton(menuBar, googleLink);
     }
-
-
 
     function addSourceButton(menuBar, url) {
         let existBtn = menuBar.querySelector(`.${sourceBtnClass}`);
@@ -133,5 +135,17 @@
         return urls[urls.length-1].split(' ')[0];
     }
 
+    function makeScreenshot(video) {
+        video.crossOrigin = "anonymous";
+        let canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        let ctx = canvas.getContext('2d');
+        let b = document.querySelector('body');
+        b.appendChild(canvas);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var img = new Image();
+        img.src = canvas.toDataURL('image/png');
+    }
 
 })();
