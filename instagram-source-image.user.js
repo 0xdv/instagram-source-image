@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.2.0
+// @version      0.3.0
 // @description  Adds buttons for simple image saving and searching in Instagram
+// @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
+// @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
 // @downloadURL  https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
 // @updateURL    https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
-// @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
 // @author       0xC0FFEEC0DE
 // @include      https://*.instagram.com/*
 // @grant        none
@@ -36,6 +37,7 @@
         if(video) {
             let article = video.closest('article');
             if(article) {
+                //video.crossOrigin = "anonymous";
                 addButtons(article, video.src, video.poster);
             }
         }
@@ -62,26 +64,21 @@
 
     let videoObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-           // console.log(mutation);
-            let video;
-            if(mutation.target.nodeName === 'ARTICLE') {
-                video = mutation.target.querySelector('video');
-            }
-            if(mutation.target.nodeName === 'VIDEO') {
-                video = mutation.target;
-            }
-
-            if(video) {
-                let article = video.closest('article');
-                if(article) {
-                    addButtons(article, video.src, video.poster);
-                }
+            console.log(mutation);
+            let video = mutation.target;
+           // video.crossOrigin = "anonymous";
+            let article = video.closest('article');
+            if(article) {
+                let screenshotSrc = makeScreenshot(video);
+                console.log(screenshotSrc);
+                //addButtons(article, video.src, video.poster);
+                addButtons(article, screenshotSrc, screenshotSrc);
             }
         });
     }).observe(document.body, {
         attributes: true,
         subtree: true,
-        attributeFilter: ['class', 'poster']
+        attributeFilter: ['loop']
     });
 
     function addButtons(article, src, googleLink) {
@@ -94,8 +91,6 @@
         addSourceButton(menuBar, src);
         addGoogleButton(menuBar, googleLink);
     }
-
-
 
     function addSourceButton(menuBar, url) {
         let existBtn = menuBar.querySelector(`.${sourceBtnClass}`);
@@ -140,5 +135,17 @@
         return urls[urls.length-1].split(' ')[0];
     }
 
+    function makeScreenshot(video) {
+        video.crossOrigin = "anonymous";
+        let canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        let ctx = canvas.getContext('2d');
+        let b = document.querySelector('body');
+        b.appendChild(canvas);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        var img = new Image();
+        img.src = canvas.toDataURL('image/png');
+    }
 
 })();
