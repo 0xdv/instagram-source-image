@@ -9,7 +9,7 @@
 // @updateURL    https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
 // @author       0xC0FFEEC0DE
 // @include      https://*.instagram.com/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
 // @license      MIT
 // ==/UserScript==
 //Search icon made by Smashicons from www.flaticon.com, Google icon made by SimpleIcon from www.flaticon.com
@@ -34,10 +34,11 @@
         }
 
         let video = article.querySelector('video');
+
         if(video) {
             let article = video.closest('article');
             if(article) {
-                //video.crossOrigin = "anonymous";
+                video.crossOrigin = "anonymous";
                 addButtons(article, video.src, video.poster);
             }
         }
@@ -65,14 +66,29 @@
     let videoObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             console.log(mutation);
+            if(mutation.target.classList.contains('processed')) {
+                return;
+            }
+
             let video = mutation.target;
+
+            video.crossOrigin = "anonymous";
+            video.load();
+            video.play();
+            /*video.onplay = () => {
+                console.log("play");
+                video.load();
+                video.play();
+            };*/
+
+            video.classList.add('processed');
            // video.crossOrigin = "anonymous";
             let article = video.closest('article');
             if(article) {
-                let screenshotSrc = makeScreenshot(video);
-                console.log(screenshotSrc);
+               // let screenshotSrc = makeScreenshot(video);
+               // console.log(screenshotSrc);
                 //addButtons(article, video.src, video.poster);
-                addButtons(article, screenshotSrc, screenshotSrc);
+                addButtons(article, video.src, video.poster);
             }
         });
     }).observe(document.body, {
@@ -90,6 +106,48 @@
 
         addSourceButton(menuBar, src);
         addGoogleButton(menuBar, googleLink);
+        addScreenButton(article, menuBar);
+    }
+
+    function addScreenButton(article, menuBar) {
+        let existBtn = menuBar.querySelector(`.${sourceBtnClass}`);
+        if(existBtn) {
+            existBtn.parentNode.removeChild(existBtn);
+        }
+
+        let sourceBtn = document.createElement('button');
+        //sourceBtn.target = '_blank';
+        sourceBtn.title = 'Screen';
+        sourceBtn.text = 'Screen';
+        sourceBtn.className += sourceBtnClass;
+
+        //sourceBtn.href = url;
+        sourceBtn.onclick = () => {
+            let video = article.querySelector('video');
+            let src = makeScreenshot(video);
+            let form = new FormData();
+
+            //form.append("encoded_image", '');
+            form.append("image_url", src);
+            form.append("encoded_image", new Blob([src], { type: "image/jpeg"}));
+            form.append("sbisrc", "Google Chrome 64.0.3282.186 (Official) Linux");
+            form.append("original_width", 640);
+            form.append("original_height", 640);
+            console.log(form);
+            GM_xmlhttpRequest({
+                url: "https://www.google.com.ua/searchbyimage/upload",
+                method: "POST",
+                /*headers: {
+                    //credentials: "same-origin"
+                    "Content-Type": "multipart/form-data"
+                },*/
+                data: form,
+                onload: (res) => { console.log(res); },
+                onerror: (res) => { console.log(res); },
+            });
+        };
+
+        menuBar.appendChild(sourceBtn);
     }
 
     function addSourceButton(menuBar, url) {
@@ -136,16 +194,18 @@
     }
 
     function makeScreenshot(video) {
-        video.crossOrigin = "anonymous";
+        //video.crossOrigin = "anonymous";
         let canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         let ctx = canvas.getContext('2d');
         let b = document.querySelector('body');
-        b.appendChild(canvas);
+        //b.appendChild(canvas);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         var img = new Image();
-        img.src = canvas.toDataURL('image/png');
+        img.src = canvas.toDataURL('image/jpeg');
+        b.appendChild(img);
+        return img.src;
     }
 
 })();
