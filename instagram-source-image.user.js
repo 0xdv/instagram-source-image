@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.2.0
+// @version      0.2.1
 // @description  Adds buttons for simple image saving and searching in Instagram
+// @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
+// @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
 // @downloadURL  https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
 // @updateURL    https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
-// @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
 // @author       0xC0FFEEC0DE
 // @include      https://*.instagram.com/*
 // @grant        none
@@ -62,26 +63,18 @@
 
     let videoObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-           // console.log(mutation);
-            let video;
-            if(mutation.target.nodeName === 'ARTICLE') {
-                video = mutation.target.querySelector('video');
-            }
-            if(mutation.target.nodeName === 'VIDEO') {
-                video = mutation.target;
-            }
+            // console.log(mutation);
+            let video = mutation.target;
 
-            if(video) {
-                let article = video.closest('article');
-                if(article) {
-                    addButtons(article, video.src, video.poster);
-                }
+            let article = video.closest('article');
+            if(article) {
+                addButtons(article, video.src, video.poster);
             }
         });
     }).observe(document.body, {
         attributes: true,
         subtree: true,
-        attributeFilter: ['class', 'poster']
+        attributeFilter: ['loop']
     });
 
     function addButtons(article, src, googleLink) {
