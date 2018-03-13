@@ -9,7 +9,6 @@
 // @updateURL    https://raw.githubusercontent.com/0xC0FFEEC0DE/instagram-source-image/master/instagram-source-image.user.js
 // @author       0xC0FFEEC0DE
 // @include      https://*.instagram.com/*
-// @grant        GM_xmlhttpRequest
 // @license      MIT
 // ==/UserScript==
 //Search icon made by Smashicons from www.flaticon.com, Google icon made by SimpleIcon from www.flaticon.com
@@ -24,6 +23,8 @@
     const sourceBtnClass = "source_button";
     const googleBtnClass = "google_source_button";
 
+    const footerPanelID = "footerPanel";
+
     let firstArticles = document.querySelectorAll('article');
     firstArticles.forEach(article => {
         let img = article.querySelector('img[srcset]');
@@ -36,9 +37,9 @@
         let video = article.querySelector('video');
 
         if(video) {
+            //video.crossOrigin = "anonymous";
             let article = video.closest('article');
             if(article) {
-                video.crossOrigin = "anonymous";
                 addButtons(article, video.src, video.poster);
             }
         }
@@ -71,18 +72,18 @@
             }
 
             let video = mutation.target;
-
             video.crossOrigin = "anonymous";
-            video.load();
-            video.play();
-            /*video.onplay = () => {
-                console.log("play");
+            console.log(video);
+            try {
                 video.load();
-                video.play();
-            };*/
+            } catch(err) {
+
+            }
+            video.play();
+
 
             video.classList.add('processed');
-           // video.crossOrigin = "anonymous";
+
             let article = video.closest('article');
             if(article) {
                // let screenshotSrc = makeScreenshot(video);
@@ -116,35 +117,15 @@
         }
 
         let sourceBtn = document.createElement('button');
-        //sourceBtn.target = '_blank';
         sourceBtn.title = 'Screen';
         sourceBtn.text = 'Screen';
         sourceBtn.className += sourceBtnClass;
 
-        //sourceBtn.href = url;
         sourceBtn.onclick = () => {
             let video = article.querySelector('video');
-            let src = makeScreenshot(video);
-            let form = new FormData();
-
-            //form.append("encoded_image", '');
-            form.append("image_url", src);
-            form.append("encoded_image", new Blob([src], { type: "image/jpeg"}));
-            form.append("sbisrc", "Google Chrome 64.0.3282.186 (Official) Linux");
-            form.append("original_width", 640);
-            form.append("original_height", 640);
-            console.log(form);
-            GM_xmlhttpRequest({
-                url: "https://www.google.com.ua/searchbyimage/upload",
-                method: "POST",
-                /*headers: {
-                    //credentials: "same-origin"
-                    "Content-Type": "multipart/form-data"
-                },*/
-                data: form,
-                onload: (res) => { console.log(res); },
-                onerror: (res) => { console.log(res); },
-            });
+            let img = makeScreenshot(video);
+            let panel = document.getElementById(footerPanelID);
+            panel.appendChild(img);
         };
 
         menuBar.appendChild(sourceBtn);
@@ -193,19 +174,32 @@
         return urls[urls.length-1].split(' ')[0];
     }
 
+    function createFooterPanel() {
+        let panel = document.createElement('div');
+        panel.id = footerPanelID;
+        panel.style.position = 'fixed';
+        panel.style.right = '4px';
+        panel.style.bottom = 0;
+        panel.style['background-color'] = '#21212121';
+
+        let body = document.querySelector('body');
+        body.appendChild(panel);
+    }
+createFooterPanel();
+
     function makeScreenshot(video) {
-        //video.crossOrigin = "anonymous";
         let canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         let ctx = canvas.getContext('2d');
-        let b = document.querySelector('body');
-        //b.appendChild(canvas);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
         var img = new Image();
         img.src = canvas.toDataURL('image/jpeg');
-        b.appendChild(img);
-        return img.src;
+        img.style.width = '230px';
+        img.style.margin = '5px';
+
+        return img;
     }
 
 })();
