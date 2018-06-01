@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.3.0
+// @version      0.3.1
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -96,7 +96,7 @@
     });
 
     function addButtons(article, src, googleLink, isScreenBtnNeed) {
-        let menuBar = article.querySelector('._hmd6j._8oo9w'); // xD
+        let menuBar = article.querySelector('.ltpMr.Slqrh'); // xD
         if(!menuBar) {
             //return console.log("no menu in this article");
             return;
