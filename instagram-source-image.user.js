@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.3.1
+// @version      0.3.2
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -122,7 +122,7 @@
         screenBtn.className += screenBtnClass;
         screenBtn.style.width = '24px';
         screenBtn.style.height = '24px';
-        screenBtn.style.margin = '8px';
+        screenBtn.style.margin = '8px 0 8px 8px';
         screenBtn.style.backgroundImage = `url(data:image/svg+xml;utf8;base64,${SCREENSHOT_ICON})`;
         screenBtn.style['background-color'] = 'white';
         screenBtn.style.border = 'none';
@@ -163,7 +163,7 @@
         sourceBtn.className += sourceBtnClass;
         sourceBtn.style.width = '24px';
         sourceBtn.style.height = '24px';
-        sourceBtn.style.margin = '8px';
+        sourceBtn.style.margin = '8px 0 8px 10px';
         sourceBtn.style.backgroundImage = `url(data:image/svg+xml;utf8;base64,${SEARCH_ICON})`;
         sourceBtn.href = url;
 
@@ -182,7 +182,7 @@
         googleBtn.className += googleBtnClass;
         googleBtn.style.width = '24px';
         googleBtn.style.height = '24px';
-        googleBtn.style.margin = '8px';
+        googleBtn.style.margin = '8px 0 8px 8px';
         googleBtn.href = `https://www.google.com/searchbyimage?image_url=${url}`;
         googleBtn.style.backgroundImage = `url(data:image/svg+xml;utf8;base64,${GOOGLE_ICON})`;
 
