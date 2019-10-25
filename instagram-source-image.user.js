@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.3.2
+// @version      0.3.3
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -68,31 +68,39 @@
     let videoObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             //console.log(mutation);
+            if(mutation.removedNodes) {
+                mutation.removedNodes.forEach(removedNode => {
+                    if (removedNode.classList.contains('_8jZFn')) {
+                        var video = mutation.previousSibling;
+                        if (video && video.tagName && video.tagName.toLowerCase() == 'video') {
 
-            if(mutation.target.classList.contains('processed')) {
-                return;
-            }
+                            if(video.classList.contains('processed')) {
+                                return;
+                            }
 
-            let video = mutation.target;
+                            let playPromise = video.play();
+                            playPromise.then(() => {
+                                video.crossOrigin = "anonymous";
+                                video.load();
+                                video.play();
+                            });
 
-            let playPromise = video.play();
-            playPromise.then(() => {
-                video.crossOrigin = "anonymous";
-                video.load();
-                video.play();
-            });
+                            video.classList.add('processed');
 
-            video.classList.add('processed');
-
-            let article = video.closest('article');
-            if(article) {
-                addButtons(article, video.src, video.poster, /*screenBtn:*/ true);
+                            let article = video.closest('article');
+                            if(article) {
+                                addButtons(article, video.src, video.poster, /*screenBtn:*/ true);
+                            }
+                        }
+                    }
+                });
             }
         });
     }).observe(document.body, {
-        attributes: true,
+        childList: true,
         subtree: true,
-        attributeFilter: ['loop']
+        attributes: false,
+        characterData: false
     });
 
     function addButtons(article, src, googleLink, isScreenBtnNeed) {
