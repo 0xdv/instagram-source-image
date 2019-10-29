@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.3.3
+// @version      0.3.4
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -13,7 +13,7 @@
 // ==/UserScript==
 //Search icon made by Smashicons from www.flaticon.com, Google icon made by SimpleIcon from www.flaticon.com, Camera icon by Gregor Cresnar from www.flaticon.com
 
-(function() {
+;(function() {
     'use strict';
 
     const SEARCH_ICON = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU2Ljk2NiA1Ni45NjYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDU2Ljk2NiA1Ni45NjY7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4Ij4KPHBhdGggZD0iTTU1LjE0Niw1MS44ODdMNDEuNTg4LDM3Ljc4NmMzLjQ4Ni00LjE0NCw1LjM5Ni05LjM1OCw1LjM5Ni0xNC43ODZjMC0xMi42ODItMTAuMzE4LTIzLTIzLTIzcy0yMywxMC4zMTgtMjMsMjMgIHMxMC4zMTgsMjMsMjMsMjNjNC43NjEsMCw5LjI5OC0xLjQzNiwxMy4xNzctNC4xNjJsMTMuNjYxLDE0LjIwOGMwLjU3MSwwLjU5MywxLjMzOSwwLjkyLDIuMTYyLDAuOTIgIGMwLjc3OSwwLDEuNTE4LTAuMjk3LDIuMDc5LTAuODM3QzU2LjI1NSw1NC45ODIsNTYuMjkzLDUzLjA4LDU1LjE0Niw1MS44ODd6IE0yMy45ODQsNmM5LjM3NCwwLDE3LDcuNjI2LDE3LDE3cy03LjYyNiwxNy0xNywxNyAgcy0xNy03LjYyNi0xNy0xN1MxNC42MSw2LDIzLjk4NCw2eiIgZmlsbD0iIzAwMDAwMCIvPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K';
@@ -26,13 +26,21 @@
 
     const footerPanelID = "footerPanel";
 
+    const galleryClass = 'XCodT';
+
     let firstArticles = document.querySelectorAll('article');
     firstArticles.forEach(article => {
+        let gallery = article.querySelector(`.${galleryClass}`);
+        if(gallery) {
+            processGallery(article);
+            return;
+        }
+
         let img = article.querySelector('img[srcset]');
         if(img) {
             let src = extractUrlFromSet(img.srcset);
             addButtons(article, src, src);
-            img.classList.add('processed');
+            return;
         }
 
         let video = article.querySelector('video');
@@ -48,21 +56,49 @@
 
     let imageObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
-          //  console.log(mutation);
+            //  console.log(mutation);
             let img = mutation.target;
-            if(!img.classList.contains('processed')) {
-                let article = img.closest('article');
-                if(article) {
-                    let src = extractUrlFromSet(img.srcset);
-                    addButtons(article, src, src);
-                    img.classList.add('processed');
-                }
+            let article = img.closest('article');
+            if(img.closest('ul.YlNGR')) { // img is in gallery
+                processGallery(article)
+                return;
+            }
+
+            if(article) {
+                let src = extractUrlFromSet(img.srcset);
+                addButtons(article, src, src);
             }
         });
     }).observe(document.body, {
         attributes: true,
         subtree: true,
         attributeFilter: ['srcset']
+    });
+
+    function processGallery(article) {
+        let div = article.querySelector(`.${galleryClass}`)
+        let galleryCursor = [...div.parentElement.children].indexOf(div)
+        let li = article.querySelectorAll('ul.YlNGR li')[galleryCursor]
+        let img = li.querySelector('img[srcset]');
+        if(img) {
+            let src = extractUrlFromSet(img.srcset);
+            addButtons(article, src, src);
+        }
+    }
+
+    let galleryObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            let div = mutation.target;
+            if(div.classList.contains(galleryClass)) {
+                let article = div.closest('article')
+                processGallery(article)
+            }
+            
+        })
+    }).observe(document.body, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['class']
     });
 
     let videoObserver = new MutationObserver(function(mutations) {
