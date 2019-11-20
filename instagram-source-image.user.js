@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.3.4
+// @version      0.3.5
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -101,34 +101,36 @@ let galleryObserver = new MutationObserver(function(mutations) {
 });
 
 let videoObserver = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-        //console.log(mutation);
-        if (mutation.removedNodes) {
-            mutation.removedNodes.forEach(removedNode => {
-                if (removedNode.classList.contains('_8jZFn')) {
-                    var video = mutation.previousSibling;
-                    if (video && video.tagName && video.tagName.toLowerCase() === 'video') {
+    mutations = Array.from(mutations);
 
-                        if (video.classList.contains('processed')) {
-                            return;
-                        }
+    function videoClassCount(removedNodes) {
+        return Array.from(removedNodes)
+            .filter(node => node.classList && node.classList.contains('_8jZFn')).length;
+    }
 
-                        let playPromise = video.play();
-                        playPromise.then(() => {
-                            video.crossOrigin = 'anonymous';
-                            video.load();
-                            video.play();
-                        });
+    let videoMutations = mutations
+        .filter(m => m.removedNodes && videoClassCount(m.removedNodes) > 0);
+    
+    if(videoMutations.length === 0) return;
 
-                        video.classList.add('processed');
+    videoMutations.forEach(m => {
+        var video = m.previousSibling;
+        if (video && video.tagName && video.tagName.toLowerCase() === 'video') {
+            if (video.classList.contains('processed')) return;
 
-                        let article = video.closest('article');
-                        if (article) {
-                            addButtons(article, video.src, video.poster, /*screenBtn:*/ true);
-                        }
-                    }
-                }
+            let playPromise = video.play();
+            playPromise.then(() => {
+                video.crossOrigin = 'anonymous';
+                video.load();
+                video.play();
             });
+
+            video.classList.add('processed');
+
+            let article = video.closest('article');
+            if (article) {
+                addButtons(article, video.src, video.poster, /*screenBtn:*/ true);
+            }
         }
     });
 }).observe(document.body, {
