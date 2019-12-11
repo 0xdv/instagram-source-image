@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Instagram Image Source and Search
 // @namespace    instagram_search
-// @version      0.3.5
+// @version      0.3.6
 // @description  Adds buttons for simple image saving and searching in Instagram
 // @homepageURL  https://github.com/0xC0FFEEC0DE/instagram-source-image
 // @supportURL   https://github.com/0xC0FFEEC0DE/instagram-source-image/issues
@@ -228,7 +228,7 @@ function addGoogleButton(menuBar, url) {
     googleBtn.style.width = '24px';
     googleBtn.style.height = '24px';
     googleBtn.style.margin = '8px 0 8px 8px';
-    googleBtn.href = `https://www.google.com/searchbyimage?image_url=${url}`;
+    googleBtn.href = `https://www.google.com/searchbyimage?image_url=${encodeURIComponent(url)}`;
     googleBtn.style.backgroundImage = `url(data:image/svg+xml;utf8;base64,${GOOGLE_ICON})`;
 
     menuBar.appendChild(googleBtn);
